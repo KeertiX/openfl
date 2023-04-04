@@ -150,7 +150,6 @@ class LocalRuntime(Runtime):
                 
                 for col in selected_collaborators:
                     clone = FLSpec._clones[col]
-                    clone.input = col
                     if (
                         "exclude" in kwargs and hasattr(clone, kwargs["exclude"][0])
                     ) or (
@@ -175,8 +174,6 @@ class LocalRuntime(Runtime):
                                 delattr(clone, attr)
                 
                 func = None
-                if self.backend == "ray":
-                    ray_executor = RayExecutor()
                 # save first collab info
                 collab_start_func = f
                 collab_start_parent_func = parent_func
@@ -210,7 +207,7 @@ class LocalRuntime(Runtime):
                     kwargs = collab_start_kwargs
                     
                     #execute all collab methods for each collab
-                    for collab in flspec_obj._foreach_methods:
+                    for each_collab_step in flspec_obj._foreach_methods:
                         to_exec = getattr(clone, f.__name__)
                         to_exec()
                         kwargs,f,parent_func,instance_snapshot = clone.execute_task_args
