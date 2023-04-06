@@ -118,6 +118,7 @@ class LocalRuntime(Runtime):
         flspec_obj: Type[FLSpec],
         f: Callable,
         parent_func: Callable,
+        to_exec,
         instance_snapshot: List[Type[FLSpec]] = [],
     ):
         """
@@ -150,6 +151,7 @@ class LocalRuntime(Runtime):
                 
                 for col in selected_collaborators:
                     clone = FLSpec._clones[col]
+                    clone.input = col                                       
                     if (
                         "exclude" in kwargs and hasattr(clone, kwargs["exclude"][0])
                     ) or (
@@ -160,29 +162,23 @@ class LocalRuntime(Runtime):
                     for name, attr in artifacts_iter():
                         setattr(clone, name, deepcopy(attr))
                     clone._foreach_methods = flspec_obj._foreach_methods
-                
-                for col in selected_collaborators:
-                    clone = FLSpec._clones[col]
-                    clone.input = col
+                    
+                    # remove private aggregator state
                     if aggregator_to_collaborator(f, parent_func):
-                        # remove private aggregator state
                         for attr in self._aggregator.private_attributes:
                             self._aggregator.private_attributes[attr] = getattr(
                                 flspec_obj, attr
                             )
                             if hasattr(clone, attr):
                                 delattr(clone, attr)
-                
+        
                 func = None
                 # save first collab info
-                collab_start_func = f
-                collab_start_parent_func = parent_func
-                collab__start_instance_snapshot = instance_snapshot
-                collab_start_kwargs = kwargs
+                collab_start_func,collab_start_parent_func,collab__start_instance_snapshot,collab_start_kwargs,collab_start_exec = f,parent_func,instance_snapshot,kwargs,to_exec
                 
-                backup_instance_snapshot =  []
-                if instance_snapshot:
-                    backup_instance_snapshot =instance_snapshot
+                # backup_instance_snapshot =  []
+                # if instance_snapshot:
+                #     backup_instance_snapshot =instance_snapshot
                 
                 for col in selected_collaborators:
                     clone = FLSpec._clones[col]
@@ -201,16 +197,13 @@ class LocalRuntime(Runtime):
                     clone._metaflow_interface = flspec_obj._metaflow_interface
 
                     #get collab starting point
-                    f = collab_start_func
-                    parent_func = collab_start_parent_func
-                    instance_snapshot = collab__start_instance_snapshot
-                    kwargs = collab_start_kwargs
-                    
+                    f,parent_func,kwargs,to_exec = collab_start_func,collab_start_parent_func,collab_start_kwargs,collab_start_exec
+                
                     #execute all collab methods for each collab
                     for each_collab_step in flspec_obj._foreach_methods:
                         to_exec = getattr(clone, f.__name__)
                         to_exec()
-                        kwargs,f,parent_func,instance_snapshot = clone.execute_task_args
+                        kwargs,f,parent_func,to_exec,_ = clone.execute_task_args
                         
                         if clone._is_at_transition_point(f, parent_func):
                             break
@@ -228,29 +221,27 @@ class LocalRuntime(Runtime):
                             delattr(clone, attr)
                 
                 # Restore the flspec_obj state if back-up is taken
-                self.restore_instance_snapshot(flspec_obj, backup_instance_snapshot)
-                del backup_instance_snapshot
+                self.restore_instance_snapshot(flspec_obj, instance_snapshot)
+                del instance_snapshot
                 
                 g = getattr(flspec_obj, func)
                 # remove private collaborator state
                 gc.collect()
                 g([FLSpec._clones[col] for col in selected_collaborators])
-                kwargs,f,parent_func,instance_snapshot = flspec_obj.execute_task_args
+                kwargs,f,parent_func,to_exec,_ = flspec_obj.execute_task_args
                     
             else:
-                to_exec = getattr(flspec_obj, f.__name__)
+                # to_exec = getattr(flspec_obj, f.__name__)
                 to_exec()
                 # update the params
-                kwargs,f,parent_func,instance_snapshot = flspec_obj.execute_task_args
+                kwargs,f,parent_func,to_exec,instance_snapshot = flspec_obj.execute_task_args
                
         else:
-            to_exec = getattr(flspec_obj, f.__name__)
+            # to_exec = getattr(flspec_obj, f.__name__)
             to_exec()
             checkpoint(flspec_obj, f)
             artifacts_iter, _ = generate_artifacts(ctx=flspec_obj)
             final_attributes = artifacts_iter()
-                
-
 
     def __repr__(self):
         return "LocalRuntime"
