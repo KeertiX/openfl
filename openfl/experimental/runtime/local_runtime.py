@@ -175,11 +175,7 @@ class LocalRuntime(Runtime):
                 func = None
                 # save first collab info
                 collab_start_func,collab_start_parent_func,collab__start_instance_snapshot,collab_start_kwargs,collab_start_exec = f,parent_func,instance_snapshot,kwargs,to_exec
-                
-                # backup_instance_snapshot =  []
-                # if instance_snapshot:
-                #     backup_instance_snapshot =instance_snapshot
-                
+            
                 for col in selected_collaborators:
                     clone = FLSpec._clones[col]
                     # Set new LocalRuntime for clone as it is required
@@ -231,13 +227,11 @@ class LocalRuntime(Runtime):
                 kwargs,f,parent_func,to_exec,_ = flspec_obj.execute_task_args
                     
             else:
-                # to_exec = getattr(flspec_obj, f.__name__)
                 to_exec()
                 # update the params
                 kwargs,f,parent_func,to_exec,instance_snapshot = flspec_obj.execute_task_args
                
         else:
-            # to_exec = getattr(flspec_obj, f.__name__)
             to_exec()
             checkpoint(flspec_obj, f)
             artifacts_iter, _ = generate_artifacts(ctx=flspec_obj)

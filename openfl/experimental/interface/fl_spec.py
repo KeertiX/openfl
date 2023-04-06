@@ -179,5 +179,5 @@ class FLSpec:
         to_exec = getattr(self, f.__name__)
         
         # update parameters to execute next function
-        self.execute_task_args = (kwargs,f,parent_func,to_exec,agg_to_collab_ss)
+        self.execute_task_args = [kwargs,f,parent_func,to_exec,agg_to_collab_ss]
     
