@@ -174,7 +174,7 @@ class LocalRuntime(Runtime):
         
                 func = None
                 # save first collab info
-                collab_start_func,collab_start_parent_func,collab__start_instance_snapshot,collab_start_kwargs,collab_start_exec = f,parent_func,instance_snapshot,kwargs,to_exec
+                collab_start_func,collab_start_parent_func,collab_start_kwargs = f,parent_func,kwargs
             
                 for col in selected_collaborators:
                     clone = FLSpec._clones[col]
@@ -193,13 +193,13 @@ class LocalRuntime(Runtime):
                     clone._metaflow_interface = flspec_obj._metaflow_interface
 
                     #get collab starting point
-                    f,parent_func,kwargs,to_exec = collab_start_func,collab_start_parent_func,collab_start_kwargs,collab_start_exec
+                    f,parent_func,kwargs = collab_start_func,collab_start_parent_func,collab_start_kwargs
                 
                     #execute all collab methods for each collab
                     for each_collab_step in flspec_obj._foreach_methods:
                         to_exec = getattr(clone, f.__name__)
                         to_exec()
-                        kwargs,f,parent_func,to_exec,_ = clone.execute_task_args
+                        kwargs,f,parent_func,_,_ = clone.execute_task_args
                         
                         if clone._is_at_transition_point(f, parent_func):
                             break
