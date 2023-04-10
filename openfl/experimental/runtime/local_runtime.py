@@ -134,9 +134,7 @@ class LocalRuntime(Runtime):
             instance_snapshot: A prior FLSpec state that needs to be restored from
                                (i.e. restoring aggregator state after collaborator
                                execution)
-        """
-        from openfl.experimental.interface import (FLSpec,final_attributes)
-                
+        """        
         while f.__name__!='end':
             if 'foreach' in kwargs:
                 f,parent_func,instance_snapshot,kwargs = self.execute_foreach_task(flspec_obj,f,parent_func,instance_snapshot,**kwargs)
@@ -154,6 +152,8 @@ class LocalRuntime(Runtime):
        
         
     def execute_end_task(self,flspec_obj,f):
+        from openfl.experimental.interface import (final_attributes)
+        global final_attributes
         flspec_obj.to_exec()
         checkpoint(flspec_obj, f)
         artifacts_iter, _ = generate_artifacts(ctx=flspec_obj)
