@@ -198,7 +198,7 @@ class LocalRuntime(Runtime):
                 if clone._is_at_transition_point(f, parent_func):
                     break
             
-        func = self.remove_collab_private_attr(selected_collaborators)
+        func= self.remove_collab_private_attr(selected_collaborators)
         
         # Restore the flspec_obj state if back-up is taken
         self.restore_instance_snapshot(flspec_obj, instance_snapshot)
@@ -225,6 +225,7 @@ class LocalRuntime(Runtime):
                     ] = getattr(clone, attr)
                     delattr(clone, attr)
         return func
+    
     def handle_exclude_include_private_attr(self,flspec_obj,f,parent_func,selected_collaborators,**kwargs):        
         from openfl.experimental.interface import (FLSpec,)
         for col in selected_collaborators:
@@ -249,6 +250,6 @@ class LocalRuntime(Runtime):
                     )
                     if hasattr(clone, attr):
                         delattr(clone, attr)
-        return flspec_obj
+        # return flspec_obj,clone
     def __repr__(self):
         return "LocalRuntime"

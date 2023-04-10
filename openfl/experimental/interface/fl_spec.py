@@ -66,7 +66,7 @@ class FLSpec:
             try:
                 self.start()
                 self.runtime.execute_task(self,self.execute_task_args[0],self.execute_task_args[1],
-                        self.execute_task_args[2])
+                        self.execute_task_args[2],**self.execute_task_args[3])
             except Exception as e:
                 if "cannot pickle" in str(e) or "Failed to unpickle" in str(e):
                     msg = (
@@ -179,5 +179,4 @@ class FLSpec:
         self.to_exec = getattr(self, f.__name__)
         
         # update parameters to execute next function
-        self.execute_task_args = [f,parent_func,agg_to_collab_ss,kwargs]
-        return    
+        self.execute_task_args = [f,parent_func,agg_to_collab_ss,kwargs]  
