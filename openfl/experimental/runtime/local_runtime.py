@@ -137,21 +137,11 @@ class LocalRuntime(Runtime):
         while f.__name__ != "end":
             if "foreach" in kwargs:
                 # save first collab info
-                (
-                    self._collab_start_func,
-                    self._collab_start_parent_func,
-                    self._collab_start_kwargs,
-                ) = (f, parent_func, kwargs)
+                self._collab_start_func,self._collab_start_parent_func,self._collab_start_kwargs,= f, parent_func, kwargs
                 f, parent_func, instance_snapshot, kwargs = self.execute_foreach_task(
-                    flspec_obj, f, parent_func, instance_snapshot, **kwargs
-                )
+                    flspec_obj, f, parent_func, instance_snapshot, **kwargs )
             else:
-                (
-                    f,
-                    parent_func,
-                    instance_snapshot,
-                    kwargs,
-                ) = self.execute_no_transition_task(flspec_obj)
+                f,parent_func,instance_snapshot,kwargs,= self.execute_no_transition_task(flspec_obj)
         else:
             self.execute_end_task(flspec_obj, f)
 
@@ -208,28 +198,13 @@ class LocalRuntime(Runtime):
             # execute all collab methods for each collab
             for each_collab_step in flspec_obj._foreach_methods:
                 to_exec = getattr(clone, f.__name__)
-                if self.backend == "ray":
-                    ray_executor.ray_call_put(clone, to_exec)
-                else:
-                    to_exec()
-                # to_exec()
+                to_exec()
                 f, parent_func, _, kwargs = clone.execute_task_args
 
                 if clone._is_at_transition_point(f, parent_func):
                     # get collab starting point
-                    f, parent_func, kwargs = (
-                        self._collab_start_func,
-                        self._collab_start_parent_func,
-                        self._collab_start_kwargs,
-                    )
+                    f, parent_func, kwargs = self._collab_start_func,self._collab_start_parent_func,self._collab_start_kwargs
                     break
-
-        if self.backend == "ray":
-            clones = ray_executor.get_remote_clones()
-            FLSpec._clones.update(zip(selected_collaborators, clones))
-            del ray_executor
-            del clones
-            gc.collect()
 
         self.remove_collab_private_attr(selected_collaborators)
 

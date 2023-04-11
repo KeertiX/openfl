@@ -177,8 +177,8 @@ class FLSpec:
 
         self._display_transition_logs(f, parent_func)
 
-        # exceute_next
+        # update function to be executed
         self.to_exec = getattr(self, f.__name__)
 
-        # update parameters to execute next function
+        # update parameters for execute_task function
         self.execute_task_args = [f, parent_func, agg_to_collab_ss, kwargs]
