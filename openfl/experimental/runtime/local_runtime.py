@@ -185,9 +185,6 @@ class LocalRuntime(Runtime):
             # write the clone to the object store
             # ensure clone is getting latest _metaflow_interface
             clone._metaflow_interface = flspec_obj._metaflow_interface
-
-            #get collab starting point
-            f,parent_func,kwargs = collab_start_func,collab_start_parent_func,collab_start_kwargs
         
             #execute all collab methods for each collab
             for each_collab_step in flspec_obj._foreach_methods:
@@ -196,6 +193,8 @@ class LocalRuntime(Runtime):
                 f,parent_func,_,kwargs= clone.execute_task_args
                 
                 if clone._is_at_transition_point(f, parent_func):
+                    #get collab starting point
+                    f,parent_func,kwargs = collab_start_func,collab_start_parent_func,collab_start_kwargs
                     break
             
         func= self.remove_collab_private_attr(selected_collaborators)
