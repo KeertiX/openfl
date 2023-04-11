@@ -137,6 +137,8 @@ class LocalRuntime(Runtime):
         """        
         while f.__name__!='end':
             if 'foreach' in kwargs:
+                # save first collab info
+                self._collab_start_func,self._collab_start_parent_func,self._collab_start_kwargs = f,parent_func,kwargs
                 f,parent_func,instance_snapshot,kwargs = self.execute_foreach_task(flspec_obj,f,parent_func,instance_snapshot,**kwargs)
             else:
                 f,parent_func,instance_snapshot,kwargs = self.execute_no_transition_task(flspec_obj)                                 
@@ -162,13 +164,11 @@ class LocalRuntime(Runtime):
     
     def execute_foreach_task(self,flspec_obj,f,parent_func,instance_snapshot,**kwargs):
         from openfl.experimental.interface import (FLSpec,)
+        func = None
         flspec_obj._foreach_methods.append(f.__name__)
         selected_collaborators = flspec_obj.__getattribute__(kwargs["foreach"])
         
-        self.handle_exclude_include_private_attr(flspec_obj,f,parent_func,selected_collaborators,**kwargs)
-       
-        # save first collab info
-        collab_start_func,collab_start_parent_func,collab_start_kwargs = f,parent_func,kwargs
+        self.filter_exclude_include_private_attr(flspec_obj,f,parent_func,selected_collaborators,**kwargs)
     
         for col in selected_collaborators:
             clone = FLSpec._clones[col]
@@ -194,15 +194,16 @@ class LocalRuntime(Runtime):
                 
                 if clone._is_at_transition_point(f, parent_func):
                     #get collab starting point
-                    f,parent_func,kwargs = collab_start_func,collab_start_parent_func,collab_start_kwargs
+                    f,parent_func,kwargs = self._collab_start_func,self._collab_start_parent_func,self._collab_start_kwargs
                     break
             
-        func= self.remove_collab_private_attr(selected_collaborators)
+        self.remove_collab_private_attr(selected_collaborators)
         
         # Restore the flspec_obj state if back-up is taken
         self.restore_instance_snapshot(flspec_obj, instance_snapshot)
         del instance_snapshot
         
+        func = clone.execute_next
         g = getattr(flspec_obj, func)
         # remove private collaborator state
         gc.collect()
@@ -210,11 +211,10 @@ class LocalRuntime(Runtime):
         return flspec_obj.execute_task_args
     
     def remove_collab_private_attr(self,selected_collaborators):
-        func = None
+        # Removes private attributes of collaborator
         from openfl.experimental.interface import (FLSpec,)
         for col in selected_collaborators:
             clone = FLSpec._clones[col]
-            func = clone.execute_next
             for attr in self.__collaborators[
                 clone.input
             ].private_attributes:
@@ -223,9 +223,10 @@ class LocalRuntime(Runtime):
                         attr
                     ] = getattr(clone, attr)
                     delattr(clone, attr)
-        return func
     
-    def handle_exclude_include_private_attr(self,flspec_obj,f,parent_func,selected_collaborators,**kwargs):        
+    def filter_exclude_include_private_attr(self,flspec_obj,f,parent_func,selected_collaborators,**kwargs):        
+        # This function filters exclude/include attributes
+        # Removes private attributes of aggregator
         from openfl.experimental.interface import (FLSpec,)
         for col in selected_collaborators:
             clone = FLSpec._clones[col]
@@ -249,6 +250,6 @@ class LocalRuntime(Runtime):
                     )
                     if hasattr(clone, attr):
                         delattr(clone, attr)
-        # return flspec_obj,clone
+        
     def __repr__(self):
         return "LocalRuntime"
