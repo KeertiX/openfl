@@ -23,7 +23,6 @@ final_attributes = []
 
 
 class FLSpec:
-
     _clones = []
     _initial_state = None
 
@@ -65,8 +64,13 @@ class FLSpec:
                 print(f"Created flow {self.__class__.__name__}")
             try:
                 self.start()
-                self.runtime.execute_task(self,self.execute_task_args[0],self.execute_task_args[1],
-                        self.execute_task_args[2],**self.execute_task_args[3])
+                self.runtime.execute_task(
+                    self,
+                    self.execute_task_args[0],
+                    self.execute_task_args[1],
+                    self.execute_task_args[2],
+                    **self.execute_task_args[3],
+                )
             except Exception as e:
                 if "cannot pickle" in str(e) or "Failed to unpickle" in str(e):
                     msg = (
@@ -132,9 +136,7 @@ class FLSpec:
         if parent_func.__name__ in self._foreach_methods:
             self._foreach_methods.append(f.__name__)
             if should_transfer(f, parent_func):
-                print(
-                    f"Should transfer from {parent_func.__name__} to {f.__name__}"
-                )
+                print(f"Should transfer from {parent_func.__name__} to {f.__name__}")
                 self.execute_next = f.__name__
                 return True
         return False
@@ -174,9 +176,9 @@ class FLSpec:
         filter_attributes(self, f, **kwargs)
 
         self._display_transition_logs(f, parent_func)
-        
+
         # exceute_next
         self.to_exec = getattr(self, f.__name__)
-        
+
         # update parameters to execute next function
-        self.execute_task_args = [f,parent_func,agg_to_collab_ss,kwargs]  
+        self.execute_task_args = [f, parent_func, agg_to_collab_ss, kwargs]
