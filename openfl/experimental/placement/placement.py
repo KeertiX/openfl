@@ -27,10 +27,14 @@ class RayExecutor:
 
     def get_remote_clones(self):
         clones = deepcopy(ray.get(self.remote_functions))
-        del self.remote_functions
-        # Remove clones from ray object store
-        for ctx in self.remote_contexts:
-            ray.cancel(ctx)
+        cln = clones[0]
+        if cln._is_at_transition_point(cln.execute_task_args[0], cln.execute_task_args[1]):
+            del self.remote_functions
+            # Remove clones from ray object store
+            for ctx in self.remote_contexts:
+                ray.cancel(ctx)
+        else:
+            self.remote_functions= []
         return clones
 
 

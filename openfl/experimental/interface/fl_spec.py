@@ -65,6 +65,13 @@ class FLSpec:
                 print(f"Created flow {self.__class__.__name__}")
             try:
                 self.start()
+                self.runtime.execute_task(
+                    self,
+                    self.execute_task_args[0],
+                    self.execute_task_args[1],
+                    self.execute_task_args[2],
+                    **self.execute_task_args[3],
+                )
             except Exception as e:
                 if "cannot pickle" in str(e) or "Failed to unpickle" in str(e):
                     msg = (
@@ -171,16 +178,10 @@ class FLSpec:
         # Remove included / excluded attributes from next task
         filter_attributes(self, f, **kwargs)
 
-        if self._is_at_transition_point(f, parent_func):
-            # Collaborator is done executing for now
-            return
-
         self._display_transition_logs(f, parent_func)
 
-        self._runtime.execute_task(
-            self,
-            f,
-            parent_func,
-            instance_snapshot=agg_to_collab_ss,
-            **kwargs,
-        )
+        # update function to be executed
+        self.to_exec = getattr(self, f.__name__)
+
+        # update parameters for execute_task function
+        self.execute_task_args = [f, parent_func, agg_to_collab_ss, kwargs]
