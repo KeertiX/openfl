@@ -175,8 +175,6 @@ class LocalRuntime(Runtime):
             flspec_obj, f, parent_func, selected_collaborators, **kwargs
         )
 
-        if self.backend == "ray":
-            ray_executor = RayExecutor()
         for col in selected_collaborators:
             clone = FLSpec._clones[col]
             # Set new LocalRuntime for clone as it is required
@@ -195,7 +193,7 @@ class LocalRuntime(Runtime):
             # ensure clone is getting latest _metaflow_interface
             clone._metaflow_interface = flspec_obj._metaflow_interface
 
-            # execute all collab methods for each collab
+            # execute all collab steps for each collab
             for each_collab_step in flspec_obj._foreach_methods:
                 to_exec = getattr(clone, f.__name__)
                 to_exec()
