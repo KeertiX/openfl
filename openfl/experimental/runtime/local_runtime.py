@@ -247,13 +247,11 @@ class LocalRuntime(Runtime):
 
         for collab in selected_collaborators:
             clone = flspec_class._clones[collab]
-            # get the function to be executed
-            to_exec = getattr(clone, f.__name__)
 
             if self.backend == "ray":
-                ray_executor.ray_put_task(clone, to_exec)
+                ray_executor.ray_put_task(clone, f)
             else:
-                collaborator_step_executor(clone, to_exec)
+                collaborator_step_executor(clone, f)
 
         if self.backend == "ray":
             clones = ray_executor.get_remote_clones()
@@ -311,11 +309,11 @@ class LocalRuntime(Runtime):
         return "LocalRuntime"
 
 
-def collaborator_step_executor(clone, to_exec):
+def collaborator_step_executor(clone, func):
     # For initial step assume there is no trasition from collab_to_agg
     not_at_transition_point = True
 
-    to_exec = getattr(clone, to_exec.__name__)
+    to_exec = getattr(clone, func.__name__)
     # loop until there is no transition
     while not_at_transition_point:
         to_exec()
