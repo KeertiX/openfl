@@ -10,6 +10,7 @@ from openfl.experimental.utilities import (
     get_number_of_gpus,
 )
 from typing import Callable
+import importlib
 
 
 class RayExecutor:
@@ -17,11 +18,19 @@ class RayExecutor:
         self.remote_functions = []
         self.remote_contexts = []
 
-    def ray_call_put(self, ctx, func):
-        remote_to_exec = make_remote(func, num_gpus=func.num_gpus)
+    def ray_put_task(self, ctx, func):
+        runtime_module = importlib.import_module(
+            "openfl.experimental.runtime.local_runtime"
+        )
+        collaborator_step_executor = getattr(
+            runtime_module, "collaborator_step_executor"
+        )
+        remote_to_exec = make_remote(collaborator_step_executor, func.num_gpus)
         ref_ctx = ray.put(ctx)
         self.remote_contexts.append(ref_ctx)
-        self.remote_functions.append(remote_to_exec.remote(ref_ctx, func.__name__))
+        self.remote_functions.append(
+            remote_to_exec.remote(collaborator_step_executor, ref_ctx, func)
+        )
         del remote_to_exec
         del ref_ctx
 
@@ -47,10 +56,11 @@ def make_remote(f: Callable, num_gpus: int) -> Callable:
     @functools.wraps(f)
     @ray.remote(num_gpus=num_gpus, max_calls=1)
     def wrapper(*args, **kwargs):
-        f = getattr(args[0], args[1])
-        print(f"\nRunning {f.__name__} in a new process")
-        f()
-        return args[0]
+        f = args[0]
+        collab_step = args[2].__name__
+        print(f"\nRunning {collab_step} in a new process")
+        f(args[1], args[2])
+        return args[1]
 
     return wrapper
 
@@ -92,11 +102,7 @@ def aggregator(f: Callable = None) -> Callable:
     return wrapper
 
 
-def collaborator(
-        f: Callable = None,
-        *,
-        num_gpus: float = 0
-) -> Callable:
+def collaborator(f: Callable = None, *, num_gpus: float = 0) -> Callable:
     """
     Placement decorator that designates that the task will
     run at the collaborator node
