@@ -111,106 +111,106 @@ def create(prefix, template):
     print_tree(prefix, level=3)
 
 
-# @workspace.command(name='export')
-# @option('-o', '--pip-install-options', required=False,
-#         type=str, multiple=True, default=tuple,
-#         help='Options for remote pip install. '
-#              'You may pass several options in quotation marks alongside with arguments, '
-#              'e.g. -o "--find-links source.site"')
-# def export_(pip_install_options: Tuple[str]):
-#     """Export federated learning workspace."""
-#     from os import getcwd
-#     from os import makedirs
-#     from os.path import basename
-#     from os.path import join
-#     from shutil import copy2
-#     from shutil import copytree
-#     from shutil import ignore_patterns
-#     from shutil import make_archive
-#     from tempfile import mkdtemp
+@workspace.command(name='export')
+@option('-o', '--pip-install-options', required=False,
+        type=str, multiple=True, default=tuple,
+        help='Options for remote pip install. '
+             'You may pass several options in quotation marks alongside with arguments, '
+             'e.g. -o "--find-links source.site"')
+def export_(pip_install_options: Tuple[str]):
+    """Export federated learning workspace."""
+    from os import getcwd
+    from os import makedirs
+    from os.path import basename
+    from os.path import join
+    from shutil import copy2
+    from shutil import copytree
+    from shutil import ignore_patterns
+    from shutil import make_archive
+    from tempfile import mkdtemp
 
-#     from plan import freeze_plan
-#     from openfl.experimental.interface.cli.cli_helper import WORKSPACE
-#     from openfl.utilities.utils import rmtree
+    from plan import freeze_plan
+    from openfl.experimental.interface.cli.cli_helper import WORKSPACE
+    from openfl.utilities.utils import rmtree
 
-#     plan_file = Path('plan/plan.yaml').absolute()
-#     try:
-#         freeze_plan(plan_file)
-#     except Exception:
-#         echo(f'Plan file "{plan_file}" not found. No freeze performed.')
+    plan_file = Path('plan/plan.yaml').absolute()
+    try:
+        freeze_plan(plan_file)
+    except Exception:
+        echo(f'Plan file "{plan_file}" not found. No freeze performed.')
 
-#     # Dump requirements.txt
-#     dump_requirements_file(prefixes=pip_install_options, keep_original_prefixes=True)
+    # Dump requirements.txt
+    dump_requirements_file(prefixes=pip_install_options, keep_original_prefixes=True)
 
-#     archive_type = 'zip'
-#     archive_name = basename(getcwd())
-#     archive_file_name = archive_name + '.' + archive_type
+    archive_type = 'zip'
+    archive_name = basename(getcwd())
+    archive_file_name = archive_name + '.' + archive_type
 
-#     # Aggregator workspace
-#     tmp_dir = join(mkdtemp(), 'openfl', archive_name)
+    # Aggregator workspace
+    tmp_dir = join(mkdtemp(), 'openfl', archive_name)
 
-#     ignore = ignore_patterns(
-#         '__pycache__', '*.crt', '*.key', '*.csr', '*.srl', '*.pem', '*.pbuf')
+    ignore = ignore_patterns(
+        '__pycache__', '*.crt', '*.key', '*.csr', '*.srl', '*.pem', '*.pbuf')
 
-#     # We only export the minimum required files to set up a collaborator
-#     makedirs(f'{tmp_dir}/save', exist_ok=True)
-#     makedirs(f'{tmp_dir}/logs', exist_ok=True)
-#     makedirs(f'{tmp_dir}/data', exist_ok=True)
-#     copytree('./src', f'{tmp_dir}/src', ignore=ignore)  # code
-#     copytree('./plan', f'{tmp_dir}/plan', ignore=ignore)  # plan
-#     copy2('./requirements.txt', f'{tmp_dir}/requirements.txt')  # requirements
+    # We only export the minimum required files to set up a collaborator
+    makedirs(f'{tmp_dir}/save', exist_ok=True)
+    makedirs(f'{tmp_dir}/logs', exist_ok=True)
+    makedirs(f'{tmp_dir}/data', exist_ok=True)
+    copytree('./src', f'{tmp_dir}/src', ignore=ignore)  # code
+    copytree('./plan', f'{tmp_dir}/plan', ignore=ignore)  # plan
+    copy2('./requirements.txt', f'{tmp_dir}/requirements.txt')  # requirements
 
-#     try:
-#         copy2('.workspace', tmp_dir)  # .workspace
-#     except FileNotFoundError:
-#         echo('\'.workspace\' file not found.')
-#         if confirm('Create a default \'.workspace\' file?'):
-#             copy2(WORKSPACE / 'workspace' / '.workspace', tmp_dir)
-#         else:
-#             echo('To proceed, you must have a \'.workspace\' '
-#                  'file in the current directory.')
-#             raise
+    try:
+        copy2('.workspace', tmp_dir)  # .workspace
+    except FileNotFoundError:
+        echo('\'.workspace\' file not found.')
+        if confirm('Create a default \'.workspace\' file?'):
+            copy2(WORKSPACE / 'workspace' / '.workspace', tmp_dir)
+        else:
+            echo('To proceed, you must have a \'.workspace\' '
+                 'file in the current directory.')
+            raise
 
-#     # Create Zip archive of directory
-#     echo('\n 🗜️ Preparing workspace distribution zip file')
-#     make_archive(archive_name, archive_type, tmp_dir)
-#     rmtree(tmp_dir)
-#     echo(f'\n ✔️ Workspace exported to archive: {archive_file_name}')
+    # Create Zip archive of directory
+    echo('\n 🗜️ Preparing workspace distribution zip file')
+    make_archive(archive_name, archive_type, tmp_dir)
+    rmtree(tmp_dir)
+    echo(f'\n ✔️ Workspace exported to archive: {archive_file_name}')
 
 
-# @workspace.command(name='import')
-# @option('--archive', required=True,
-#         help='Zip file containing workspace to import',
-#         type=ClickPath(exists=True))
-# def import_(archive):
-#     """Import federated learning workspace."""
-#     from os import chdir
-#     from os.path import basename
-#     from os.path import isfile
-#     from shutil import unpack_archive
-#     from subprocess import check_call
-#     from sys import executable
+@workspace.command(name='import')
+@option('--archive', required=True,
+        help='Zip file containing workspace to import',
+        type=ClickPath(exists=True))
+def import_(archive):
+    """Import federated learning workspace."""
+    from os import chdir
+    from os.path import basename
+    from os.path import isfile
+    from shutil import unpack_archive
+    from subprocess import check_call
+    from sys import executable
 
-#     archive = Path(archive).absolute()
+    archive = Path(archive).absolute()
 
-#     dir_path = basename(archive).split('.')[0]
-#     unpack_archive(archive, extract_dir=dir_path)
-#     chdir(dir_path)
+    dir_path = basename(archive).split('.')[0]
+    unpack_archive(archive, extract_dir=dir_path)
+    chdir(dir_path)
 
-#     requirements_filename = 'requirements.txt'
+    requirements_filename = 'requirements.txt'
 
-#     if isfile(requirements_filename):
-#         check_call([
-#             executable, '-m', 'pip', 'install', '--upgrade', 'pip'],
-#             shell=False)
-#         check_call([
-#             executable, '-m', 'pip', 'install', '-r', 'requirements.txt'],
-#             shell=False)
-#     else:
-#         echo('No ' + requirements_filename + ' file found.')
+    if isfile(requirements_filename):
+        check_call([
+            executable, '-m', 'pip', 'install', '--upgrade', 'pip'],
+            shell=False)
+        check_call([
+            executable, '-m', 'pip', 'install', '-r', 'requirements.txt'],
+            shell=False)
+    else:
+        echo('No ' + requirements_filename + ' file found.')
 
-#     echo(f'Workspace {archive} has been imported.')
-#     echo('You may need to copy your PKI certificates to join the federation.')
+    echo(f'Workspace {archive} has been imported.')
+    echo('You may need to copy your PKI certificates to join the federation.')
 
 
 @workspace.command(name='certify')

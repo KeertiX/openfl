@@ -123,23 +123,23 @@ def initialize(context, plan_config, cols_config, data_config,
 
 
 # TODO: looks like Plan.method
-# def freeze_plan(plan_config):
-#     """Dump the plan to YAML file."""
-#     from pathlib import Path
+def freeze_plan(plan_config):
+    """Dump the plan to YAML file."""
+    from pathlib import Path
 
-#     from openfl.federated import Plan
+    from openfl.federated import Plan
 
-#     plan = Plan()
-#     plan.config = Plan.parse(Path(plan_config), resolve=False).config
+    plan = Plan()
+    plan.config = Plan.parse(Path(plan_config), resolve=False).config
 
-#     init_state_path = plan.config['aggregator']['settings']['init_state_path']
+    init_state_path = plan.config['aggregator']['settings']['init_state_path']
 
-#     if not Path(init_state_path).exists():
-#         logger.info("Plan has not been initialized! Run 'fx plan"
-#                     " initialize' before proceeding")
-#         return
+    if not Path(init_state_path).exists():
+        logger.info("Plan has not been initialized! Run 'fx plan"
+                    " initialize' before proceeding")
+        return
 
-#     Plan.dump(Path(plan_config), plan.config, freeze=True)
+    Plan.dump(Path(plan_config), plan.config, freeze=True)
 
 
 # @plan.command(name='freeze')
