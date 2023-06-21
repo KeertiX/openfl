@@ -314,7 +314,7 @@ class Plan:
         """Get federation aggregator."""
         defaults = self.config.get('aggregator',
                                    {
-                                       TEMPLATE: 'openfl.component.Aggregator',
+                                       TEMPLATE: 'openfl.experimental.Aggregator',
                                        SETTINGS: {}
                                    })
 
@@ -446,7 +446,7 @@ class Plan:
         defaults = self.config.get(
             'collaborator',
             {
-                TEMPLATE: 'openfl.component.Collaborator',
+                TEMPLATE: 'openfl.experimental.Collaborator',
                 SETTINGS: {}
             }
         )
