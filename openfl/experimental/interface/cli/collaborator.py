@@ -115,6 +115,7 @@ def register_data_path(collaborator_name, data_path=None, silent=False):
     data_yaml = 'plan/data.yaml'
     if isfile(data_yaml):
         d= Plan.load(Path(data_yaml).absolute())
+        
     # to be removed later
     # separator = ','
     # if isfile(data_yaml):
@@ -124,7 +125,9 @@ def register_data_path(collaborator_name, data_path=None, silent=False):
     #                 key, val = line.split(separator, maxsplit=1)
     #                 d[key] = val.strip()
 
-    d[collaborator_name] = dir_path
+    # d[collaborator_name] = dir_path
+    
+    d["collab"]["name"] = collaborator_name
     
     # Write the data.yaml
     if isfile(data_yaml):
