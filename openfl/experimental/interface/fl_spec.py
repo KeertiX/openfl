@@ -39,7 +39,7 @@ class FLSpec:
     @classmethod
     def _reset_clones(cls):
         """Reset clones"""
-        cls._clones = []
+        cls._clones = {}
 
     @classmethod
     def save_initial_state(cls, instance: Type[FLSpec]) -> None:
@@ -54,17 +54,27 @@ class FLSpec:
         )
         self._run_id = self._metaflow_interface.create_run()
         if str(self._runtime) == "LocalRuntime":
-            # Setup any necessary ShardDescriptors through the LocalEnvoys
-            # Assume that first task always runs on the aggregator
+            # Initialize aggregator private attributes
+            self.runtime.initialize_aggregator()
             self._setup_aggregator()
             self._foreach_methods = []
             FLSpec._reset_clones()
             FLSpec._create_clones(self, self.runtime.collaborators)
+            # Initialize collaborator private attributes
+            self.runtime.initialize_collaborators()
             # the start function can just be invoked locally
             if self._checkpoint:
                 print(f"Created flow {self.__class__.__name__}")
             try:
+                # Assume that first task always runs on the aggregator
                 self.start()
+                self.runtime.execute_task(
+                    self,
+                    *self.execute_task_args[:3],
+                    **self.execute_task_args[3],
+                )
+                # execute_task_args will be updated in self.start()
+                # after the next function is executed
             except Exception as e:
                 if "cannot pickle" in str(e) or "Failed to unpickle" in str(e):
                     msg = (
@@ -74,7 +84,8 @@ class FLSpec:
                         "\nLocalRuntime(...,backend='single_process')\n"
                         "\n or for more information about the original error,"
                         "\nPlease see the official Ray documentation"
-                        "\nhttps://docs.ray.io/en/latest/ray-core/objects/serialization.html"
+                        "\nhttps://docs.ray.io/en/releases-2.2.0/ray-core/\
+                        objects/serialization.html"
                     )
                     raise SerializationError(str(e) + msg)
                 else:
@@ -171,16 +182,7 @@ class FLSpec:
         # Remove included / excluded attributes from next task
         filter_attributes(self, f, **kwargs)
 
-        if self._is_at_transition_point(f, parent_func):
-            # Collaborator is done executing for now
-            return
-
         self._display_transition_logs(f, parent_func)
 
-        self._runtime.execute_task(
-            self,
-            f,
-            parent_func,
-            instance_snapshot=agg_to_collab_ss,
-            **kwargs,
-        )
+        # update parameters required to execute execute_task function
+        self.execute_task_args = [f, parent_func, agg_to_collab_ss, kwargs]

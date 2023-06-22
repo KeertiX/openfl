@@ -3,6 +3,8 @@
 # SPDX-License-Identifier: Apache-2.0
 """CLI module."""
 
+import os
+
 from click import argument
 from click import command
 from click import confirm
@@ -209,6 +211,13 @@ def review_plan_callback(file_name, file_path):
 def show_header():
     """Show header."""
     banner = 'OpenFL - Open Federated Learning'
+
+    experimental = os.path.join(
+        os.path.expanduser("~"), ".openfl", "experimental"
+    )
+    if os.path.exists(experimental):
+        banner = 'OpenFL - Open Federated Learning (Experimental)'
+
     echo(style(f'{banner:<80}', bold=True, bg='bright_blue'))
     echo()
 
@@ -219,13 +228,20 @@ def entry():
     from pathlib import Path
     from sys import path
 
-    file = Path(__file__).resolve()
-    root = file.parent.resolve()  # interface root, containing command modules
+    experimental = Path(
+        os.path.expanduser("~"), ".openfl", "experimental"
+    ).resolve()
+
+    root = Path(__file__).parent.resolve()
+
+    if experimental.exists():
+        root = root.parent.joinpath("experimental", "interface", "cli").resolve()
+
     work = Path.cwd().resolve()
     path.append(str(root))
     path.insert(0, str(work))
 
-    for module in root.glob('*.py'):  # load command modules
+    for module in root.glob('*.py'): # load command modules
 
         package = module.parent
         module = module.name.split('.')[0]
