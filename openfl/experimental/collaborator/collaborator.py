@@ -13,6 +13,7 @@ from openfl.pipelines import NoCompressionPipeline
 from openfl.pipelines import TensorCodec
 from openfl.protocols import utils
 from openfl.utilities import TensorKey
+from typing import Callable
 
 
 class DevicePolicy(Enum):
@@ -79,6 +80,7 @@ class Collaborator:
                  delta_updates=False,
                  compression_pipeline=None,
                  db_store_rounds=1,
+                 private_attributes_callable: Callable = None,
                  **kwargs):
         """Initialize."""
         self.single_col_cert_common_name = None
@@ -104,6 +106,9 @@ class Collaborator:
         self.task_config = task_config
 
         self.logger = getLogger(__name__)
+        
+        self.private_attributes_callable = private_attributes_callable
+        self.private_attributes_kwargs =  kwargs
 
         # RESET/CONTINUE_LOCAL/CONTINUE_GLOBAL
         if hasattr(OptTreatment, opt_treatment):

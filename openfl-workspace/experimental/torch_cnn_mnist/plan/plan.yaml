@@ -4,6 +4,10 @@
 aggregator :
   defaults : plan/defaults/aggregator.yaml
   template : openfl.experimental.Aggregator
+  callable_func:
+    settings:
+      index: 1
+    template: src.private_attributes.callable_to_initialize_aggregator_private_attributes
   settings :
     init_state_path     : save/torch_cnn_mnist_init.pbuf
     best_state_path     : save/torch_cnn_mnist_best.pbuf

@@ -14,6 +14,9 @@ from click import Path as ClickPath
 from click import style
 
 from openfl.utilities.path_check import is_directory_traversal
+from pathlib import Path
+from openfl.experimental.federated.plan import Plan
+import yaml
 
 logger = getLogger(__name__)
 
@@ -110,21 +113,29 @@ def register_data_path(collaborator_name, data_path=None, silent=False):
     # Read the data.yaml file
     d = {}
     data_yaml = 'plan/data.yaml'
-    separator = ','
     if isfile(data_yaml):
-        with open(data_yaml, 'r', encoding='utf-8') as f:
-            for line in f:
-                if separator in line:
-                    key, val = line.split(separator, maxsplit=1)
-                    d[key] = val.strip()
+        d= Plan.load(Path(data_yaml).absolute())
+    # to be removed later
+    # separator = ','
+    # if isfile(data_yaml):
+    #     with open(data_yaml, 'r', encoding='utf-8') as f:
+    #         for line in f:
+    #             if separator in line:
+    #                 key, val = line.split(separator, maxsplit=1)
+    #                 d[key] = val.strip()
 
     d[collaborator_name] = dir_path
-
+    
     # Write the data.yaml
     if isfile(data_yaml):
-        with open(data_yaml, 'w', encoding='utf-8') as f:
-            for key, val in d.items():
-                f.write(f'{key}{separator}{val}\n')
+        with open(data_yaml, "w", encoding="utf-8") as f:
+            f.write(yaml.dump(d))
+    # TODO: to be removed
+    # # Write the data.yaml
+    # if isfile(data_yaml):
+    #     with open(data_yaml, 'w', encoding='utf-8') as f:
+    #         for key, val in d.items():
+    #             f.write(f'{key}{separator}{val}\n')
 
 
 @collaborator.command(name='generate-cert-request')

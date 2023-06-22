@@ -128,13 +128,19 @@ class Plan:
             #  value as the plan hash
             plan.cols_data_paths = {}
             if data_config_path is not None:
-                data_config = open(data_config_path, 'r')
-                for line in data_config:
-                    line = line.rstrip()
-                    if len(line) > 0:
-                        if line[0] != '#':
-                            collab, data_path = line.split(',', maxsplit=1)
-                            plan.cols_data_paths[collab] = data_path
+                with open(data_config_path, "r", encoding="utf-8") as f:
+                    # TODO:need to replace with load
+                    plan.cols_data_paths = safe_load(f)
+                    
+            # TODO: to be removed
+            # if data_config_path is not None:
+            #     data_config = open(data_config_path, 'r')
+            #     for line in data_config:
+            #         line = line.rstrip()
+            #         if len(line) > 0:
+            #             if line[0] != '#':
+            #                 collab, data_path = line.split(',', maxsplit=1)
+            #                 plan.cols_data_paths[collab] = data_path
 
             if resolve:
                 plan.resolve()
@@ -325,6 +331,8 @@ class Plan:
         defaults[SETTINGS]['compression_pipeline'] = self.get_tensor_pipe()
         defaults[SETTINGS]['straggler_handling_policy'] = self.get_straggler_handling_policy()
         log_metric_callback = defaults[SETTINGS].get('log_metric_callback')
+        defaults[SETTINGS]["private_attributes_callable"] = self.config.get("aggregator")["settings"]["callable_func"]["template"]
+        kwargs = self.config.get("aggregator")["settings"]["callable_func"]["settings"]
 
         if log_metric_callback:
             if isinstance(log_metric_callback, dict):
@@ -335,7 +343,7 @@ class Plan:
 
         defaults[SETTINGS]['log_metric_callback'] = log_metric_callback
         if self.aggregator_ is None:
-            self.aggregator_ = Plan.build(**defaults, initial_tensor_dict=tensor_dict)
+            self.aggregator_ = Plan.build(**defaults, initial_tensor_dict=tensor_dict,**kwargs)
 
         return self.aggregator_
 
@@ -379,10 +387,13 @@ class Plan:
                                        SETTINGS: {}
                                    })
 
-        defaults[SETTINGS]['data_path'] = self.cols_data_paths[
-            collaborator_name
-        ]
+        # TODO: to be removed
+        # defaults[SETTINGS]['data_path'] = self.cols_data_paths[
+        #     collaborator_name
+        # ]
 
+        defaults[SETTINGS]["data_path"] = self.cols_data_paths['collab']['callable_func']['settings']['index']
+        
         if self.loader_ is None:
             self.loader_ = Plan.build(**defaults)
 
@@ -478,6 +489,8 @@ class Plan:
 
         defaults[SETTINGS]['compression_pipeline'] = self.get_tensor_pipe()
         defaults[SETTINGS]['task_config'] = self.config.get('tasks', {})
+        defaults[SETTINGS]["private_attributes_callable"] = self.cols_data_paths["collab"]["callable_func"]["template"]
+        kwargs= self.cols_data_paths["collab"]["callable_func"]["settings"]
         if client is not None:
             defaults[SETTINGS]['client'] = client
         else:
@@ -491,7 +504,7 @@ class Plan:
             )
 
         if self.collaborator_ is None:
-            self.collaborator_ = Plan.build(**defaults)
+            self.collaborator_ = Plan.build(**defaults,**kwargs)
 
         return self.collaborator_
 
@@ -593,3 +606,24 @@ class Plan:
             return None
         obj = serializer_plugin.restore_object(filename)
         return obj
+
+    def get_flow(self):
+        """ instantiates federated flow object """
+        defaults = self.config.get(
+            "federated_flow",
+            {TEMPLATE: self.config["federated_flow"]["template"], SETTINGS: {}},
+        )
+        for key in defaults[SETTINGS]:
+            value_defaults = defaults[SETTINGS][key]
+            if isinstance(value_defaults, str):
+                class_name = splitext(value_defaults)[1].strip(".")
+                if class_name:
+                    module_path = splitext(value_defaults)[0]
+                    try:
+                        if import_module(module_path):
+                            value_defaults_data = {TEMPLATE: value_defaults, SETTINGS: {}}
+                            defaults[SETTINGS][key] = Plan.build(**value_defaults_data)
+                    except:
+                        print("module doesn't exist")
+        self.flow_ = Plan.build(**defaults)
+        return self.flow_

@@ -6,4 +6,13 @@
 # construct the shard of the mnist dataset to be use for this collaborator.
 
 # collaborator_name ,data_directory_path
-one,1
+collab:
+  callable_func:
+    settings:
+      batch_size: 32
+      index: 1
+      num_collab: 2
+      test_dataset: src.private_attributes.test_dataset
+      train_dataset: src.private_attributes.train_dataset
+    template: src.private_attributes.callable_to_initialize_collaborator_private_attributes
+  name: col_one

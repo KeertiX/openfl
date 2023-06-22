@@ -17,6 +17,7 @@ from openfl.utilities import change_tags
 from openfl.utilities import TaskResultKey
 from openfl.utilities import TensorKey
 from openfl.utilities.logs import write_metric
+from typing import Callable
 
 
 class Aggregator:
@@ -53,6 +54,7 @@ class Aggregator:
                  db_store_rounds=1,
                  write_logs=False,
                  log_metric_callback=None,
+                 private_attributes_callable: Callable = None,
                  **kwargs):
         """Initialize."""
         self.round_number = 0
@@ -125,6 +127,8 @@ class Aggregator:
         self.collaborator_tasks_results = {}  # {TaskResultKey: list of TensorKeys}
 
         self.collaborator_task_weight = {}  # {TaskResultKey: data_size}
+        self.private_attributes_callable = private_attributes_callable
+        self.private_attributes_kwargs =   kwargs.get('private_kwargs')
 
     def _load_initial_tensors(self):
         """
