@@ -53,7 +53,7 @@ def start_(plan, authorized_cols, secure):
                       cols_config_path=Path(authorized_cols).absolute())
 
     logger.info('🧿 Starting the Aggregator Service.')
-
+    plan.get_flow()
     plan.get_server().serve()
 
 

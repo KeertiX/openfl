@@ -593,3 +593,24 @@ class Plan:
             return None
         obj = serializer_plugin.restore_object(filename)
         return obj
+
+    def get_flow(self):
+        """ instantiates federated flow object """
+        defaults = self.config.get(
+            "federated_flow",
+            {TEMPLATE: self.config["federated_flow"]["template"], SETTINGS: {}},
+        )
+        for key in defaults[SETTINGS]:
+            value_defaults = defaults[SETTINGS][key]
+            if isinstance(value_defaults, str):
+                class_name = splitext(value_defaults)[1].strip(".")
+                if class_name:
+                    module_path = splitext(value_defaults)[0]
+                    try:
+                        if import_module(module_path):
+                            value_defaults_data = {TEMPLATE: value_defaults, SETTINGS: {}}
+                            defaults[SETTINGS][key] = Plan.build(**value_defaults_data)
+                    except:
+                        print("module doesn't exist")
+        self.flow_ = Plan.build(**defaults)
+        return self.flow_

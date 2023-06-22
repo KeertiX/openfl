@@ -20,6 +20,13 @@ collaborator :
     delta_updates    : false
     opt_treatment    : RESET
 
+federated_flow:
+  settings:
+    model: src.model.Net
+    optimizer: None
+    rounds: 4
+  template: src.flow.FederatedFlow
+
 data_loader :
   defaults : plan/defaults/data_loader.yaml
   template : src.ptmnist_inmemory.PyTorchMNISTInMemory
