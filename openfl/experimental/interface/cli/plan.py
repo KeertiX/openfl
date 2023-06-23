@@ -66,41 +66,41 @@ def initialize(context, plan_config, cols_config, data_config,
                       cols_config_path=cols_config,
                       data_config_path=data_config)
 
-    init_state_path = plan.config['aggregator']['settings']['init_state_path']
+    # init_state_path = plan.config['aggregator']['settings']['init_state_path']
 
-    # TODO:  Is this part really needed?  Why would we need to collaborator
-    #  name to know the input shape to the model?
+    # # TODO:  Is this part really needed?  Why would we need to collaborator
+    # #  name to know the input shape to the model?
 
-    # if  feature_shape is None:
-    #     if  cols_config is None:
-    #         exit('You must specify either a feature
-    #         shape or authorized collaborator
-    #         list in order for the script to determine the input layer shape')
+    # # if  feature_shape is None:
+    # #     if  cols_config is None:
+    # #         exit('You must specify either a feature
+    # #         shape or authorized collaborator
+    # #         list in order for the script to determine the input layer shape')
     print(plan.cols_data_paths)
 
     collaborator_cname = list(plan.cols_data_paths)[0]
 
-    data_loader = plan.get_data_loader(collaborator_cname)
-    task_runner = plan.get_task_runner(data_loader)
-    tensor_pipe = plan.get_tensor_pipe()
+    # data_loader = plan.get_data_loader(collaborator_cname)
+    # task_runner = plan.get_task_runner(data_loader)
+    # tensor_pipe = plan.get_tensor_pipe()
 
-    tensor_dict, holdout_params = split_tensor_dict_for_holdouts(
-        logger,
-        task_runner.get_tensor_dict(False),
-        **task_runner.tensor_dict_split_fn_kwargs
-    )
+    # tensor_dict, holdout_params = split_tensor_dict_for_holdouts(
+    #     logger,
+    #     task_runner.get_tensor_dict(False),
+    #     **task_runner.tensor_dict_split_fn_kwargs
+    # )
 
-    logger.warn(f'Following parameters omitted from global initial model, '
-                f'local initialization will determine'
-                f' values: {list(holdout_params.keys())}')
+    # logger.warn(f'Following parameters omitted from global initial model, '
+    #             f'local initialization will determine'
+    #             f' values: {list(holdout_params.keys())}')
 
-    model_snap = utils.construct_model_proto(tensor_dict=tensor_dict,
-                                             round_number=0,
-                                             tensor_pipe=tensor_pipe)
+    # model_snap = utils.construct_model_proto(tensor_dict=tensor_dict,
+    #                                          round_number=0,
+    #                                          tensor_pipe=tensor_pipe)
 
-    logger.info(f'Creating Initial Weights File    🠆 {init_state_path}')
+    # logger.info(f'Creating Initial Weights File    🠆 {init_state_path}')
 
-    utils.dump_proto(model_proto=model_snap, fpath=init_state_path)
+    # utils.dump_proto(model_proto=model_snap, fpath=init_state_path)
 
     plan_origin = Plan.parse(plan_config, resolve=False).config
 
