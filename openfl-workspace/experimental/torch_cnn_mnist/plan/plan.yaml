@@ -25,6 +25,7 @@ federated_flow:
     optimizer: None
     rounds: 4
   template: src.flow.FederatedFlow
+  checkpoint: false
 
 network :
   defaults : plan/defaults/network.yaml

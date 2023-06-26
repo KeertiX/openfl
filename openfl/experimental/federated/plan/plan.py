@@ -340,6 +340,9 @@ class Plan:
         defaults[SETTINGS]["private_attributes_callable"] = self.config.get(
             "aggregator"
         )["callable_func"]["template"]
+        
+        defaults[SETTINGS]["checkpoint"] = self.config.get("federated_flow")['checkpoint']
+        defaults[SETTINGS]["flow"] = self.flow_
 
         if log_metric_callback:
             if isinstance(log_metric_callback, dict):

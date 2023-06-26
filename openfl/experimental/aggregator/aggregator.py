@@ -43,6 +43,7 @@ class Aggregator:
         aggregator_uuid,
         federation_uuid,
         authorized_cols,
+        flow,
         # init_state_path,
         # best_state_path,
         # last_state_path,
@@ -55,8 +56,10 @@ class Aggregator:
         write_logs=False,
         log_metric_callback=None,
         private_attributes_callable: Callable = None,
+        checkpoint:bool=False,
         **kwargs,
     ):
+        import pdb;pdb.set_trace()
         """Initialize."""
         self.round_number = 0
         self.single_col_cert_common_name = single_col_cert_common_name
@@ -131,6 +134,8 @@ class Aggregator:
         self.collaborator_task_weight = {}  # {TaskResultKey: data_size}
         self.private_attributes_callable = private_attributes_callable
         self.private_attributes_kwargs = kwargs["callable_func"]["settings"]
+        self.checkpoint =  checkpoint
+        self.flow = flow
 
     def _load_initial_tensors(self):
         """
