@@ -73,8 +73,8 @@ class Collaborator:
                  aggregator_uuid,
                  federation_uuid,
                  client,
-                 task_runner,
-                 task_config,
+                #  task_runner,
+                #  task_config,
                  opt_treatment='RESET',
                  device_assignment_policy='CPU_ONLY',
                  delta_updates=False,
@@ -98,12 +98,12 @@ class Collaborator:
         self.tensor_db = TensorDB()
         self.db_store_rounds = db_store_rounds
 
-        self.task_runner = task_runner
+        # self.task_runner = task_runner
         self.delta_updates = delta_updates
 
         self.client = client
 
-        self.task_config = task_config
+        # self.task_config = task_config
 
         self.logger = getLogger(__name__)
         
@@ -126,7 +126,7 @@ class Collaborator:
                 f'Unknown device_assignment_policy: {device_assignment_policy}.'
             )
 
-        self.task_runner.set_optimizer_treatment(self.opt_treatment.name)
+        # self.task_runner.set_optimizer_treatment(self.opt_treatment.name)
 
     def set_available_devices(self, cuda: Tuple[str] = ()):
         """

@@ -331,7 +331,7 @@ class Plan:
         defaults[SETTINGS]["aggregator_uuid"] = self.aggregator_uuid
         defaults[SETTINGS]["federation_uuid"] = self.federation_uuid
         defaults[SETTINGS]["authorized_cols"] = self.authorized_cols
-        defaults[SETTINGS]["assigner"] = self.get_assigner()
+        # defaults[SETTINGS]["assigner"] = self.get_assigner()
         defaults[SETTINGS]["compression_pipeline"] = self.get_tensor_pipe()
         defaults[SETTINGS][
             "straggler_handling_policy"
@@ -475,37 +475,37 @@ class Plan:
         defaults[SETTINGS]["aggregator_uuid"] = self.aggregator_uuid
         defaults[SETTINGS]["federation_uuid"] = self.federation_uuid
 
-        if task_runner is not None:
-            defaults[SETTINGS]["task_runner"] = task_runner
-        else:
-            # Here we support new interactive api as well as old task_runner subclassing interface
-            # If Task Runner class is placed incide openfl `task-runner` subpackage it is
-            # a part of the New API and it is a part of OpenFL kernel.
-            # If Task Runner is placed elsewhere, somewhere in user workspace, than it is
-            # a part of the old interface and we follow legacy initialization procedure.
-            if (
-                "openfl.federated.task.task_runner"
-                in self.config["task_runner"]["template"]
-            ):
-                # Interactive API
-                (
-                    model_provider,
-                    task_keeper,
-                    data_loader,
-                ) = self.deserialize_interface_objects()
-                data_loader = self.initialize_data_loader(data_loader, shard_descriptor)
-                defaults[SETTINGS]["task_runner"] = self.get_core_task_runner(
-                    data_loader=data_loader,
-                    model_provider=model_provider,
-                    task_keeper=task_keeper,
-                )
-            else:
-                # TaskRunner subclassing API
-                data_loader = self.get_data_loader(collaborator_name)
-                defaults[SETTINGS]["task_runner"] = self.get_task_runner(data_loader)
+        # if task_runner is not None:
+        #     defaults[SETTINGS]["task_runner"] = task_runner
+        # else:
+        #     # Here we support new interactive api as well as old task_runner subclassing interface
+        #     # If Task Runner class is placed incide openfl `task-runner` subpackage it is
+        #     # a part of the New API and it is a part of OpenFL kernel.
+        #     # If Task Runner is placed elsewhere, somewhere in user workspace, than it is
+        #     # a part of the old interface and we follow legacy initialization procedure.
+        #     if (
+        #         "openfl.federated.task.task_runner"
+        #         in self.config["task_runner"]["template"]
+        #     ):
+        #         # Interactive API
+        #         (
+        #             model_provider,
+        #             task_keeper,
+        #             data_loader,
+        #         ) = self.deserialize_interface_objects()
+        #         data_loader = self.initialize_data_loader(data_loader, shard_descriptor)
+        #         defaults[SETTINGS]["task_runner"] = self.get_core_task_runner(
+        #             data_loader=data_loader,
+        #             model_provider=model_provider,
+        #             task_keeper=task_keeper,
+        #         )
+        #     else:
+        #         # TaskRunner subclassing API
+        #         data_loader = self.get_data_loader(collaborator_name)
+        #         defaults[SETTINGS]["task_runner"] = self.get_task_runner(data_loader)
 
         defaults[SETTINGS]["compression_pipeline"] = self.get_tensor_pipe()
-        defaults[SETTINGS]["task_config"] = self.config.get("tasks", {})
+        # defaults[SETTINGS]["task_config"] = self.config.get("tasks", {})
         defaults[SETTINGS]["private_attributes_callable"] = self.cols_data_paths[
             "collab"
         ]["callable_func"]["template"]

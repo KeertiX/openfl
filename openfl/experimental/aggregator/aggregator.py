@@ -43,10 +43,10 @@ class Aggregator:
         aggregator_uuid,
         federation_uuid,
         authorized_cols,
-        init_state_path,
-        best_state_path,
-        last_state_path,
-        assigner,
+        # init_state_path,
+        # best_state_path,
+        # last_state_path,
+        # assigner,
         straggler_handling_policy=None,
         rounds_to_train=256,
         single_col_cert_common_name=None,
@@ -80,7 +80,7 @@ class Aggregator:
         self.authorized_cols = authorized_cols
         self.uuid = aggregator_uuid
         self.federation_uuid = federation_uuid
-        self.assigner = assigner
+        # self.assigner = assigner
         self.quit_job_sent_to = []
 
         self.tensor_db = TensorDB()
@@ -105,9 +105,9 @@ class Aggregator:
         self.compression_pipeline = compression_pipeline or NoCompressionPipeline()
         self.tensor_codec = TensorCodec(self.compression_pipeline)
 
-        self.init_state_path = init_state_path
-        self.best_state_path = best_state_path
-        self.last_state_path = last_state_path
+        # self.init_state_path = init_state_path
+        # self.best_state_path = best_state_path
+        # self.last_state_path = last_state_path
 
         self.best_tensor_dict: dict = {}
         self.last_tensor_dict: dict = {}
@@ -119,9 +119,9 @@ class Aggregator:
                 round_number=0,
                 tensor_pipe=self.compression_pipeline,
             )
-        else:
-            self.model: base_pb2.ModelProto = utils.load_proto(self.init_state_path)
-            self._load_initial_tensors()  # keys are TensorKeys
+        # else:
+        #     self.model: base_pb2.ModelProto = utils.load_proto(self.init_state_path)
+        #     self._load_initial_tensors()  # keys are TensorKeys
 
         self.collaborator_tensor_results = {}  # {TensorKey: nparray}}
 
@@ -306,9 +306,10 @@ class Aggregator:
 
         time_to_quit = False
         # otherwise, get the tasks from our task assigner
-        tasks = self.assigner.get_tasks_for_collaborator(
-            collaborator_name, self.round_number
-        )
+        # tasks = self.assigner.get_tasks_for_collaborator(
+        #     collaborator_name, self.round_number
+        # )
+        tasks = []
 
         # if no tasks, tell the collaborator to sleep
         if len(tasks) == 0:
