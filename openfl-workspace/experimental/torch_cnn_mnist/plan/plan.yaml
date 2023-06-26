@@ -1,0 +1,32 @@
+# Copyright (C) 2020-2023 Intel Corporation
+# Licensed subject to the terms of the separately executed evaluation license agreement between Intel Corporation and you.
+
+aggregator :
+  defaults : plan/defaults/aggregator.yaml
+  template : openfl.experimental.Aggregator
+  callable_func:
+    settings:
+      index: 1
+    template: src.private_attributes.callable_to_initialize_aggregator_private_attributes
+  settings :
+    rounds_to_train     : 10
+    log_metric_callback :
+      template : src.mnist_utils.write_metric
+
+
+collaborator :
+  defaults : plan/defaults/collaborator.yaml
+  template : openfl.experimental.Collaborator
+  settings : {}
+
+federated_flow:
+  settings:
+    model: src.model.Net
+    optimizer: None
+    rounds: 4
+  template: src.flow.FederatedFlow
+
+network :
+  defaults : plan/defaults/network.yaml
+
+
