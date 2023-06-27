@@ -59,7 +59,6 @@ class Aggregator:
         checkpoint:bool=False,
         **kwargs,
     ):
-        import pdb;pdb.set_trace()
         """Initialize."""
         self.round_number = 0
         self.single_col_cert_common_name = single_col_cert_common_name

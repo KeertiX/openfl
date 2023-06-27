@@ -49,3 +49,7 @@ def callable_to_initialize_collaborator_private_attributes(
             test, batch_size=batch_size, shuffle=True
         ),
     }
+
+
+def callable_to_initialize_aggregator_private_attributes(index):
+    print("calling aggregator private attributes")

@@ -337,13 +337,22 @@ class Plan:
             "straggler_handling_policy"
         ] = self.get_straggler_handling_policy()
         log_metric_callback = defaults[SETTINGS].get("log_metric_callback")
-        defaults[SETTINGS]["private_attributes_callable"] = self.config.get(
-            "aggregator"
-        )["callable_func"]["template"]
         
         defaults[SETTINGS]["checkpoint"] = self.config.get("federated_flow")['checkpoint']
         defaults[SETTINGS]["flow"] = self.flow_
+        private_attr_callable = {"template": self.config.get("aggregator")["callable_func"]["template"]}
+        
+        if private_attr_callable:
+            if isinstance(private_attr_callable, dict):
+                private_attr_callable = Plan.import_(**private_attr_callable)
+        if not callable(private_attr_callable):
+            raise TypeError(
+                f"private_attr_callable should be callable object "
+                f"or be import from code part, get {private_attr_callable}"
+            )
 
+        defaults[SETTINGS]["private_attributes_callable"] = private_attr_callable
+        
         if log_metric_callback:
             if isinstance(log_metric_callback, dict):
                 log_metric_callback = Plan.import_(**log_metric_callback)
@@ -465,7 +474,7 @@ class Plan:
         root_certificate=None,
         private_key=None,
         certificate=None,
-        task_runner=None,
+        # task_runner=None,
         client=None,
         shard_descriptor=None,
     ):
@@ -509,10 +518,24 @@ class Plan:
 
         defaults[SETTINGS]["compression_pipeline"] = self.get_tensor_pipe()
         # defaults[SETTINGS]["task_config"] = self.config.get("tasks", {})
-        defaults[SETTINGS]["private_attributes_callable"] = self.cols_data_paths[
-            "collab"
-        ]["callable_func"]["template"]
+        # defaults[SETTINGS]["private_attributes_callable"] = self.cols_data_paths[
+        #     "collab"
+        # ]["callable_func"]["template"]
         kwargs = self.cols_data_paths["collab"]["callable_func"]["settings"]
+        
+        private_attr_callable =  {"template":self.cols_data_paths["collab"]["callable_func"]['template']}
+        
+        if private_attr_callable:
+            if isinstance(private_attr_callable, dict):
+                private_attr_callable = Plan.import_(**private_attr_callable)
+        if not callable(private_attr_callable):
+            raise TypeError(
+                f"private_attr_callable should be callable object "
+                f"or be import from code part, get {private_attr_callable}"
+            )
+
+        defaults[SETTINGS]["private_attributes_callable"] = private_attr_callable
+        
         if client is not None:
             defaults[SETTINGS]["client"] = client
         else:
